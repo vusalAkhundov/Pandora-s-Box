@@ -42,6 +42,7 @@ namespace Analyzer1
             if (namedTypeSymbol.Name.ToCharArray().Any(char.IsLower))
             {
                 // For all such symbols, produce a diagnostic.
+                //iydioqwe
                 var diagnostic = Diagnostic.Create(Rule, namedTypeSymbol.Locations[0], namedTypeSymbol.Name);
 
                 context.ReportDiagnostic(diagnostic);
