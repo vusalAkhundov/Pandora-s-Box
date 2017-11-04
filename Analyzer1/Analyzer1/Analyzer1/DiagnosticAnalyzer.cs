@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Analyzer1
 {
@@ -30,23 +31,40 @@ namespace Analyzer1
         {
             // TODO: Consider registering other actions that act on syntax instead of or in addition to symbols
             // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/Analyzer%20Actions%20Semantics.md for more information
-            context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
+            context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.NamedType);
+            context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.Namespace);
+            context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.Method);
+            context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.Event);
         }
 
-        private static void AnalyzeSymbol(SymbolAnalysisContext context)
+        private static void AnalyzeSymbolNamedType(SymbolAnalysisContext context)
         {
+            Regex UpperCamelCase = new Regex("[A-Z][a-zA-Z0-9]*");
+            Regex IUpperCamelCase = new Regex("I[A-Z][a-zA-Z0-9]*");
+            Regex TUpperCamelCase = new Regex("T[A-Z][a-zA-Z0-9]*");
+            Regex lowerCamelCase = new Regex("[a-z][a-zA-Z0-9]*");
+            Regex _lowerCamelCase = new Regex("_[a-z][a-zA-Z0-9]*");
+            Regex defaultPattern = UpperCamelCase;
             // TODO: Replace the following code with your own analysis, generating Diagnostic objects for any issues you find
-            var namedTypeSymbol = (INamedTypeSymbol)context.Symbol;
-
-            // Find just those named type symbols with names containing lowercase letters.
-            if (namedTypeSymbol.Name.ToCharArray().Any(char.IsLower))
+            if (context.Symbol as ITypeParameterSymbol!=null)
             {
-                // For all such symbols, produce a diagnostic.
-                //iydioqwe
-                var diagnostic = Diagnostic.Create(Rule, namedTypeSymbol.Locations[0], namedTypeSymbol.Name);
-
-                context.ReportDiagnostic(diagnostic);
+                defaultPattern = TUpperCamelCase;
             }
+            else if (context.Symbol as ILocalSymbol != null)
+            {
+                defaultPattern = lowerCamelCase;
+            }
+            if (!defaultPattern.IsMatch(context.Symbol.Name))
+           {
+               // For all such symbols, produce a diagnostic.
+               //iydioqwe
+               var diagnostic = Diagnostic.Create(Rule, context.Symbol.Locations[0], context.Symbol.Name);
+           
+               context.ReportDiagnostic(diagnostic);
+           }
+
+            
         }
+
     }
 }
