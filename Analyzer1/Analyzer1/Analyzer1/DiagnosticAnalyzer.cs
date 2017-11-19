@@ -32,9 +32,7 @@ namespace Analyzer1
             // TODO: Consider registering other actions that act on syntax instead of or in addition to symbols
             // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/Analyzer%20Actions%20Semantics.md for more information
             context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.NamedType);
-            context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.Namespace);
-            context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.Method);
-            context.RegisterSymbolAction(AnalyzeSymbolNamedType, SymbolKind.Event);
+            context.RegisterSymbolAction(AnalyzeSymbolInterface, SymbolKind.NamedType);
         }
 
         private static void AnalyzeSymbolNamedType(SymbolAnalysisContext context)
@@ -66,5 +64,22 @@ namespace Analyzer1
             
         }
 
+
+        private static void AnalyzeSymbolInterface(SymbolAnalysisContext context)
+        {
+            Regex IUpperCamelCase = new Regex("I[A-Z][a-zA-Z0-9]*");
+            if (context.Symbol is INamedTypeSymbol iface)
+            {
+                if(iface.TypeKind == TypeKind.Interface)
+                {
+                    if (!IUpperCamelCase.IsMatch(iface.Name))
+                    {
+                        var diagnostic = Diagnostic.Create(Rule, context.Symbol.Locations[0], context.Symbol.Name);
+                        context.ReportDiagnostic(diagnostic);
+                    }
+
+                }
+            }
+        }
     }
 }
