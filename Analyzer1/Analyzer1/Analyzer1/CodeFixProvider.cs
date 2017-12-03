@@ -33,22 +33,38 @@ namespace Analyzer1
 
         public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
-            var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+            Diagnostic interfaceDiag = context.Diagnostics.First();
+            context.RegisterCodeFix(CodeAction.Create(title, async token =>
+            {
+                // файл, в кот произошла диагностика
+                Document doc = context.Document;
 
-            // TODO: Replace the following code with your own analysis, generating a CodeAction for each fix to suggest
-            var diagnostic = context.Diagnostics.First();
-            var diagnosticSpan = diagnostic.Location.SourceSpan;
+                // корневой элемент синтаксического дерева
+                var root = await doc.GetSyntaxRootAsync(token);
 
-            // Find the type declaration identified by the diagnostic.
-            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
+                //уел, кот описывает объявление интерфейса
+                InterfaceDeclarationSyntax node = root.FindNode(interfaceDiag.Location.SourceSpan) as InterfaceDeclarationSyntax;
+                // получаем имя интерфейса
+                string interfaceName = node.Identifier.Text;
+                if (interfaceName[0] == 'i')
+                {
+                    interfaceName = interfaceName.Remove(0, 1).Insert(0, "I");
+                }
+                else
+                {
+                    char first = interfaceName[0];
+                    interfaceName = interfaceName.Remove(0, 1).Insert(0, "I" + char.ToUpper(first));
+                }
 
-            // Register a code action that will invoke the fix.
-            context.RegisterCodeFix(
-                CodeAction.Create(
-                    title: title,
-                    createChangedSolution: c => MakeUppercaseAsync(context.Document, declaration, c),
-                    equivalenceKey: title),
-                diagnostic);
+                // синтаксич дерево неизменяемо
+                // создаем новый узел через замену, т.к. нет конструктора
+                InterfaceDeclarationSyntax newNode = node.ReplaceToken(node.Identifier, SyntaxFactory.Identifier(interfaceName)); //SyntaxFactory - создает новый идентификатор
+
+                var newDoc = doc.WithSyntaxRoot(root.ReplaceNode(node, newNode));
+                return newDoc;
+            }), interfaceDiag);
+
+
         }
 
         private async Task<Solution> MakeUppercaseAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
