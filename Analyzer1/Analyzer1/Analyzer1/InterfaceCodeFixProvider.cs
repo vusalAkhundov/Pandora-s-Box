@@ -15,14 +15,14 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Analyzer1
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(Analyzer1CodeFixProvider)), Shared]
-    public class Analyzer1CodeFixProvider : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InterfaceCodeFixProvider)), Shared]
+    public class InterfaceCodeFixProvider : CodeFixProvider
     {
         private const string title = "Make ICamelCase";
 
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(InterfaceAnalyzer.DiagnosticId); }
+            get { return ImmutableArray.Create(InterfaceDiagnosticAnalyzer.DiagnosticId); }
         }
 
         public sealed override FixAllProvider GetFixAllProvider()
@@ -49,6 +49,16 @@ namespace Analyzer1
                 if (interfaceName[0] == 'i')
                 {
                     interfaceName = interfaceName.Remove(0, 1).Insert(0, "I");
+                    if (char.IsLower(interfaceName[1]))
+                    {
+                        char second = interfaceName[1];
+                        interfaceName = interfaceName.Remove(1, 1).Insert(1, char.ToUpper(second).ToString());
+                    }
+                }
+                else if (interfaceName[0] == 'I')
+                {
+                    char second = interfaceName[1];
+                    interfaceName = interfaceName.Remove(1, 1).Insert(1, char.ToUpper(second).ToString());
                 }
                 else
                 {

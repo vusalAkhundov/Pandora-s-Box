@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 namespace Analyzer1
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class InterfaceAnalyzer : DiagnosticAnalyzer
+    public class InterfaceDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "InterfaceAnalyzer";       
         private const string Category = "Naming";
