@@ -34,7 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ClassDiagnosicAnalyzer.cs" />
+    <Compile Include="ClassCodeFixProvider.cs" />
+    <Compile Include="ClassDiagnosticAnalyzer.cs" />
+    <Compile Include="EnumCodeFixProvider.cs" />
+    <Compile Include="EnumDiagnosticAnalyzer.cs" />
     <Compile Include="InterfaceCodeFixProvider.cs" />
     <Compile Include="InterfaceDiagnosticAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -43,6 +46,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="StructureCodeFixProvider.cs" />
+    <Compile Include="StructuteDiagnosticAnalyzer1.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
